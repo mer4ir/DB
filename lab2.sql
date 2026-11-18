@@ -30,9 +30,7 @@ SELECT
     c.last_name,
     p.amount
 FROM customer c
-LEFT JOIN payment p 
-    ON c.customer_id = p.customer_id 
-   AND p.amount > 10.00;
+LEFT JOIN payment p ON c.customer_id = p.customer_id AND p.amount > 10.00;
 
 -- Task5
 SELECT 
@@ -81,3 +79,16 @@ HAVING COUNT(fa.film_id) = (
 );
 
 -- Task9
+SELECT 
+    c.name,
+    COUNT(r.rental_id) AS rentals_count,
+    SUM(p.amount) AS amount_sum
+FROM category c
+JOIN film_category fc ON c.category_id = fc.category_id
+JOIN film f ON fc.film_id = f.film_id
+JOIN inventory i ON f.film_id = i.film_id
+JOIN rental r ON i.inventory_id = r.inventory_id
+JOIN payment p ON r.rental_id = p.rental_id
+GROUP BY c.category_id, c.name
+HAVING COUNT(r.rental_id) > 60
+ORDER BY amount_sum DESC, c.name ASC;

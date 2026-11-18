@@ -13,9 +13,9 @@ CREATE FUNCTION business_category_function(
 RETURNS VARCHAR(20)
 BEGIN
     DECLARE v_days INT;
-
+ 
     SET v_days = business_metric_function(target_created_at);
-
+ 
     IF v_days < 7 THEN
         RETURN 'fresh';
     ELSEIF v_days <= 30 THEN
@@ -54,24 +54,24 @@ CREATE PROCEDURE action_procedure(
 BEGIN
     DECLARE v_user_id  INT;
     DECLARE v_group_id INT;
-
+ 
     SELECT user_id INTO v_user_id
     FROM users
     WHERE email COLLATE utf8mb4_0900_ai_ci = p_email COLLATE utf8mb4_0900_ai_ci
     LIMIT 1;
-
+ 
     SELECT group_id INTO v_group_id
     FROM user_groups
     WHERE name COLLATE utf8mb4_0900_ai_ci = p_group_name COLLATE utf8mb4_0900_ai_ci
     LIMIT 1;
-
+ 
     IF v_user_id IS NULL THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Пользователь с таким email не найден';
     END IF;
     IF v_group_id IS NULL THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Группа с таким названием не найдена';
     END IF;
-
+ 
     INSERT INTO posts (group_id, user_id, content, created_at)
     VALUES (v_group_id, v_user_id, p_content, p_created_at);
 END
@@ -121,31 +121,31 @@ BEGIN
     DECLARE v_post_user INT;
     DECLARE v_author_id INT;
     DECLARE v_comments  INT DEFAULT 0;
-
+ 
     SELECT COUNT(*), MAX(user_id) INTO v_found, v_post_user
     FROM posts
     WHERE post_id = p_post_id;
-
+ 
     IF v_found = 0 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Пост не найден';
     END IF;
-
+ 
     SELECT user_id INTO v_author_id
     FROM users
     WHERE email COLLATE utf8mb4_0900_ai_ci = p_author_email COLLATE utf8mb4_0900_ai_ci
     LIMIT 1;
-
+ 
     IF v_author_id IS NULL OR v_author_id <> v_post_user THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Пользователь не является автором поста';
     END IF;
-
+ 
     SELECT COUNT(*) INTO v_comments
     FROM comments
     WHERE post_id = p_post_id;
-
+ 
     IF v_comments > 0 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'У поста есть комментарии, удаление невозможно';
     END IF;
-
+ 
     DELETE FROM posts WHERE post_id = p_post_id;
 END

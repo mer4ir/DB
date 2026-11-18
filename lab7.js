@@ -1,5 +1,4 @@
 // Task1
-
 db.post_documents.insertOne({
   postCode: "POST-9001",
   visibility: "public",
